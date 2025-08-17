@@ -12,7 +12,6 @@ router.post("/register/:type", async (req, res) => {
   const {
     name,
     hospital_name,
-    bloodbank_name,
     email,
     password,
     blood_type,
@@ -30,14 +29,16 @@ router.post("/register/:type", async (req, res) => {
       );
     } else if (type === "hospital") {
       await db.query(
-        "INSERT INTO hospitals (hospital_name, email, password, contact_number, address) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO hospital (hospital_name, email, password, contact_number, address) VALUES (?, ?, ?, ?, ?)",
         [hospital_name, email, hashedPassword, contact_number, address]
       );
     } else if (type === "bloodbank") {
-      await db.query(
-        "INSERT INTO blood_banks (name, email, password, contact_number, address) VALUES (?, ?, ?, ?, ?)",
-        [bloodbank_name, email, hashedPassword, contact_number, address]
+      // sakto - kay ang column name sa table kay "name"
+      await pool.query(
+        "INSERT INTO blood_bank (name, email, password, contact_number, address) VALUES (?, ?, ?, ?, ?)",
+        [name, email, hashedPassword, contact_number, address]
       );
+
     } else {
       return res.status(400).json({ error: "Invalid account type" });
     }
@@ -58,8 +59,8 @@ router.post("/login", async (req, res) => {
   try {
     let table = "";
     if (role === "donor") table = "donors";
-    if (role === "hospital") table = "hospitals";
-    if (role === "bloodbank") table = "blood_banks";
+    if (role === "hospital") table = "hospital";
+    if (role === "bloodbank") table = "blood_bank";
 
     if (!table) return res.status(400).json({ error: "Invalid role" });
 

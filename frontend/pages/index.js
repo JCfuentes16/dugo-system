@@ -1,7 +1,9 @@
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 
 export default function Login() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("donor");
@@ -19,8 +21,17 @@ export default function Login() {
 
       const data = await res.json();
       if (res.ok) {
+        // ✅ Save token & role
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("email", email);
+
         setMessage("Login successful!");
-        console.log("User data:", data);
+
+        // ✅ Redirect to role-based dashboard
+        if (data.role === "donor") router.push("/dashboard/donor");
+        if (data.role === "hospital") router.push("/dashboard/hospital");
+        if (data.role === "bloodbank") router.push("/dashboard/bloodbank");
       } else {
         setMessage(data.error || "Login failed");
       }
@@ -70,7 +81,9 @@ export default function Login() {
           </button>
         </form>
 
-        {message && <p style={{ marginTop: "10px", color: "#D50000" }}>{message}</p>}
+        {message && (
+          <p style={{ marginTop: "10px", color: "#D50000" }}>{message}</p>
+        )}
 
         <p style={styles.linkText}>
           Don’t have an account?{" "}
